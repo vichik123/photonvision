@@ -228,9 +228,7 @@ public class USBCameraSource extends VisionSource {
 
         private int timeToPiCamRawExposure(double time_us) {
             int retVal =
-                    (int)
-                            Math.round(
-                                    time_us / 100.0); // Pi Cam's (both v1 and v2) need exposure time in units of
+                    (int) (time_us / 100.0); // Pi Cam's (both v1 and v2) need exposure time in units of
             // 100us/bit
             return Math.min(Math.max(retVal, 1), 10000); // Cap to allowable range for parameter
         }
@@ -250,7 +248,7 @@ public class USBCameraSource extends VisionSource {
                 try {
                     int scaledExposure = 1;
                     if (getCameraConfiguration().cameraQuirks.hasQuirk(CameraQuirk.PiCam)) {
-                        scaledExposure = Math.round(timeToPiCamRawExposure(pctToExposureTimeUs(exposure)));
+                        scaledExposure = timeToPiCamRawExposure(pctToExposureTimeUs(exposure));
                         logger.debug("Setting camera raw exposure to " + scaledExposure);
                         camera.getProperty("raw_exposure_time_absolute").set(scaledExposure);
                         camera.getProperty("raw_exposure_time_absolute").set(scaledExposure);
@@ -275,11 +273,11 @@ public class USBCameraSource extends VisionSource {
                             propMax = 140;
                         }
 
-                        var exposure_manual_val = MathUtils.map(Math.round(exposure), 0, 100, propMin, propMax);
+                        var exposure_manual_val = MathUtils.map(exposure, 0, 100, propMin, propMax);
                         logger.debug("Setting camera exposure to " + exposure_manual_val);
                         prop.set((int) exposure_manual_val);
                     } else {
-                        scaledExposure = (int) Math.round(exposure);
+                        scaledExposure = (int) exposure;
                         logger.debug("Setting camera exposure to " + scaledExposure);
                         camera.setExposureManual(scaledExposure);
                         camera.setExposureManual(scaledExposure);
