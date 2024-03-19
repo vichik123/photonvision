@@ -180,7 +180,7 @@ public class RKNNPipeline extends CVPipeline<CVPipelineResult, RKNNPipelineSetti
 
     boolean isIn(List<NeuralNetworkPipeResult> list, NeuralNetworkPipeResult target) {
         for (var item : list)
-            if (item.box.equals(target.box)
+            if (item.bbox.equals(target.bbox)
                     && item.classIdx == target.classIdx
                     && item.confidence == target.confidence) return true;
         return false;
