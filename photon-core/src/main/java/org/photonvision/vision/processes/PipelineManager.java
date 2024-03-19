@@ -226,48 +226,10 @@ public class PipelineManager {
             return;
         }
 
-        // Cleanup potential old native resources before swapping over for user pipelines
-        if (currentUserPipeline != null && !(newIndex < 0)) {
-            currentUserPipeline.release();
-        }
-
         currentPipelineIndex = newIndex;
-        if (newIndex >= 0) {
-            var desiredPipelineSettings = userPipelineSettings.get(currentPipelineIndex);
-            switch (desiredPipelineSettings.pipelineType) {
-                case Reflective:
-                    logger.debug("Creating Reflective pipeline");
-                    currentUserPipeline =
-                            new ReflectivePipeline((ReflectivePipelineSettings) desiredPipelineSettings);
-                    break;
-                case ColoredShape:
-                    logger.debug("Creating ColoredShape pipeline");
-                    currentUserPipeline =
-                            new ColoredShapePipeline((ColoredShapePipelineSettings) desiredPipelineSettings);
-                    break;
-                case AprilTag:
-                    logger.debug("Creating AprilTag pipeline");
-                    currentUserPipeline =
-                            new AprilTagPipeline((AprilTagPipelineSettings) desiredPipelineSettings);
-                    break;
 
-                case Aruco:
-                    logger.debug("Creating Aruco Pipeline");
-                    currentUserPipeline = new ArucoPipeline((ArucoPipelineSettings) desiredPipelineSettings);
-                    break;
-                case RKNN:
-                    logger.debug("Creating RKNN Pipeline");
-                    currentUserPipeline = new RKNNPipeline((RKNNPipelineSettings) desiredPipelineSettings);
-                    break;
-                case ObjectDetection:
-                    logger.debug("Creating ObjectDetection Pipeline");
-                    currentUserPipeline =
-                            new ObjectDetectionPipeline(
-                                    (ObjectDetectionPipelineSettings) desiredPipelineSettings);
-                default:
-                    // Can be calib3d or drivermode, both of which are special cases
-                    break;
-            }
+        if (newIndex >= 0) {
+            recreateUserPipeline();
         }
 
         DataChangeService.getInstance()
@@ -382,6 +344,53 @@ public class PipelineManager {
                     logger.error("Got invalid pipeline type: " + type);
                     return null;
                 }
+        }
+    }
+    
+    /**
+     * Recreate the current user pipeline with the current pipeline index. Useful to force a
+     * recreation after changing pipeline type
+     */
+    private void recreateUserPipeline() {
+        // Cleanup potential old native resources before swapping over from a user pipeline
+        if (currentUserPipeline != null && !(currentPipelineIndex < 0)) {
+            currentUserPipeline.release();
+        }
+
+        var desiredPipelineSettings = userPipelineSettings.get(currentPipelineIndex);
+        switch (desiredPipelineSettings.pipelineType) {
+            case Reflective:
+                logger.debug("Creating Reflective pipeline");
+                currentUserPipeline =
+                        new ReflectivePipeline((ReflectivePipelineSettings) desiredPipelineSettings);
+                break;
+            case ColoredShape:
+                logger.debug("Creating ColoredShape pipeline");
+                currentUserPipeline =
+                        new ColoredShapePipeline((ColoredShapePipelineSettings) desiredPipelineSettings);
+                break;
+            case AprilTag:
+                logger.debug("Creating AprilTag pipeline");
+                currentUserPipeline =
+                        new AprilTagPipeline((AprilTagPipelineSettings) desiredPipelineSettings);
+                break;
+                
+            case RKNN:
+                logger.debug("Creating RKNN Pipeline");
+                currentUserPipeline = new RKNNPipeline((RKNNPipelineSettings) desiredPipelineSettings);
+                break;
+
+            case Aruco:
+                logger.debug("Creating Aruco Pipeline");
+                currentUserPipeline = new ArucoPipeline((ArucoPipelineSettings) desiredPipelineSettings);
+                break;
+            case ObjectDetection:
+                logger.debug("Creating ObjectDetection Pipeline");
+                currentUserPipeline =
+                        new ObjectDetectionPipeline((ObjectDetectionPipelineSettings) desiredPipelineSettings);
+            default:
+                // Can be calib3d or drivermode, both of which are special cases
+                break;
         }
     }
 
